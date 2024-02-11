@@ -1,0 +1,38 @@
+.property {
+  margin: 50px 0 50px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inputText label {
+  margin-right: 15px;
+}
+
+.inputText input {
+  padding: 8px;
+  min-width: calc(100vh / 2);
+  font-weight: bold;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+button {
+  font-size: 16px;
+  padding: 8px;
+  font-weight: 600;
+}
+
+.wordDisplay {
+  white-space: nowrap;
+  margin-top: 50px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.wordDisplay .word {
+  margin-right: 25px;
+  font-size: calc(15px + 2vmin);
+}
