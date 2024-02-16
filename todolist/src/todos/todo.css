@@ -1,0 +1,21 @@
+.todo {
+  .workIcon {
+    background-image: url("/src/assets/work.png");
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    content: "";
+  }
+
+  .workIcon::before {
+    background-image: url("/src/assets/work.png");
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    content: "";
+  }
+}
+
+.mr-1 {
+  margin-right: 8px !important;
+}

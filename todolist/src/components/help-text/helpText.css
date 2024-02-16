@@ -1,0 +1,12 @@
+.helpText {
+  color: #3e5c76;
+  font-size: 80%;
+  padding-bottom: 2px;
+  margin-bottom: 8px;
+}
+
+.inline {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}

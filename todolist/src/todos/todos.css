@@ -1,0 +1,36 @@
+table.todoContainer {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  td,
+  th {
+    padding: 5px 8px;
+    border: 1px solid #ddd;
+    width: 1%;
+    vertical-align: middle;
+  }
+
+  th {
+    background-color: #e3f2fd;
+    text-align: left;
+    color: #42a5f5;
+    font-weight: normal;
+  }
+
+  td.done {
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  td.icon {
+    text-align: center;
+  }
+
+  .text {
+    font-size: 18px;
+    font-weight: bold;
+    color: #004e98;
+    width: 50%;
+  }
+}
