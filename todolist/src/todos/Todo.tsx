@@ -1,12 +1,7 @@
 import "./todo.css";
 import moment from "moment";
 import * as React from "react";
-
-export enum TodoType {
-  Work = "Work",
-  Personal = "Personal",
-  Weekend = "Weekend",
-}
+import { TodoType } from "../constants";
 
 export interface TodoProps {
   id: string;
@@ -27,38 +22,25 @@ export interface TodoDisplayOptions {
 export interface Props {
   todo: TodoProps;
   options: TodoDisplayOptions;
+  onUpdate: (todo: TodoProps) => void;
+  onDelete: (todo: TodoProps) => void;
 }
 
 export const Todo: React.FC<Props> = (props: Props) => {
   const {
+    todo,
     todo: { completed, text, id, timeModified },
     options: { hideCompleted = false, intervalMins = 10 },
+    onUpdate,
+    onDelete,
   } = props;
 
   const [nonce, setNonce] = React.useState(Date.now());
 
   const daysPending = React.useMemo(() => {
     // calculate the days that this todo has been pending from the last modified time
-    console.log(
-      `DEBUG_CON-Todo checking pending: `,
-      JSON.stringify({ nonce }, (_, v) => (typeof v === "undefined" ? "undefined" : v), 1)
-    );
-    let pending = moment().diff(moment(timeModified), "days");
-    if (pending) {
-      return `${pending} Days`;
-    }
-
-    pending = moment().diff(moment(timeModified), "hours");
-    if (pending) {
-      return `${pending} Hours`;
-    }
-
-    pending = moment().diff(moment(timeModified), "minutes");
-    if (pending) {
-      return `${pending} Mins`;
-    }
-
-    return `${moment().diff(moment(timeModified), "seconds")} Secs`;
+    return moment(timeModified).fromNow();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeModified, nonce]);
 
   React.useEffect(() => {
@@ -82,9 +64,56 @@ export const Todo: React.FC<Props> = (props: Props) => {
   }
 
   return (
+    <li className="flex pb-2 first:pt-0 last:pb-0 border-b-2 items-center justify-between">
+      <div className="flex items-center grow">
+        <div className="h-4 w-4 rounded-full border-slate-100  mx-3 mr-3 bg-red-400 shadow hover:shadow-lg shrink-0"></div>
+        <div>
+          <input
+            type="checkbox"
+            className="h-5 w-5 m-3"
+            checked={completed}
+            onChange={(e) => {
+              onUpdate({
+                ...todo,
+                completed: e.target.checked,
+                timeModified: moment().toDate(),
+              });
+            }}
+          />
+        </div>
+        <div className="m-3 text-blue-900 text-xl font-bold break-words">{todo.text}</div>
+      </div>
+
+      <div className="flex items-center content-end">
+        <div className="text-sm text-gray-400 whitespace-nowrap mr-3">{daysPending}</div>
+        <svg
+          className="fill-current h-6 w-6 text-red-500"
+          role="button"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 20 20"
+          onClick={() => {
+            onDelete(todo);
+          }}>
+          <title>Close</title>
+          <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z" />
+        </svg>
+      </div>
+    </li>
+  );
+
+  return (
     <tr key={id} className="todo">
       <td className="done">
-        <input type="checkbox" checked={completed} />
+        <input
+          type="checkbox"
+          checked={completed}
+          onChange={(e) => {
+            onUpdate({
+              ...todo,
+              completed: e.target.checked,
+            });
+          }}
+        />
       </td>
       <td className="icon">
         <i className="workIcon" />
