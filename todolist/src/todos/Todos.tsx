@@ -1,12 +1,12 @@
-import "./todos.css";
-import moment from "moment";
-import * as React from "react";
-import { v4 as uuid4 } from "uuid";
-import { emitSuccess } from "../components/alert/Alert";
-import { useLocalStorage } from "../components/hooks/useLocalStorage";
-import { TodoEventEmitter } from "../components/TodoEventEmitter";
-import { AlertType, ApplicationEvents, TodoType } from "../constants";
-import { Todo, TodoProps } from "./Todo";
+import './todos.css';
+import moment from 'moment';
+import * as React from 'react';
+import { useHotkeys } from 'react-hotkeys-hook';
+import { v4 as uuid4 } from 'uuid';
+import { useLocalStorage } from '../components/hooks/useLocalStorage';
+import { emitError, emitSuccess, TodoType } from '../constants';
+import { AddUpdateTodoDialog } from './AddUpdateTodoDialog';
+import { Todo, TodoProps } from './Todo';
 
 const SEPARATOR = "%%%";
 const DATE_FORMAT = `DD/MMM/YYYY${SEPARATOR}dddd`;
@@ -19,20 +19,13 @@ export interface Props {
 export const Todos: React.FC<Props> = (props: Props) => {
   const { intervalMins, hideCompleted } = props;
   const [todos = [], setTodos] = useLocalStorage<TodoProps[]>({ key: "irfan_todos", defaultValue: [] });
+  const [addMode, setAddMode] = React.useState(false);
 
   const addTodo = React.useCallback(() => {
-    const text = prompt("Enter text for todo:");
-    const todo: TodoProps = {
-      id: uuid4(),
-      text,
-      timeCreated: moment().toDate(),
-      timeModified: moment().toDate(),
-      completed: false,
-      type: TodoType.Work,
-    };
+    setAddMode(true);
+  }, []);
 
-    setTodos([todo, ...todos]);
-  }, [setTodos, todos]);
+  useHotkeys("alt+n", addTodo);
 
   const dateTodoMap = React.useMemo(() => {
     if (!todos || todos.length === 0) {
@@ -55,26 +48,15 @@ export const Todos: React.FC<Props> = (props: Props) => {
       return current;
     }, {});
 
-    console.log(
-      `DEBUG_CON-Todos Mapped Todos: `,
-      JSON.stringify({ map }, (_, v) => (typeof v === "undefined" ? "undefined" : v), 1)
-    );
-
     return map;
   }, [todos]);
 
   const handleTodoUpdate = React.useCallback(
     (updatedTodo: TodoProps) => {
-      console.log(
-        `DEBUG_CON-Todos updated todo: `,
-        JSON.stringify({ todos, updatedTodo }, (_, v) => (typeof v === "undefined" ? "undefined" : v), 1)
-      );
-
       const index = todos.findIndex((todo) => todo.id === updatedTodo.id);
       if (index !== -1) {
         todos.splice(index, 1, updatedTodo);
         setTodos([...todos]);
-        emitSuccess({ title: "Todo updated successfully", details: updatedTodo.text });
       }
     },
     [todos, setTodos]
@@ -108,27 +90,26 @@ export const Todos: React.FC<Props> = (props: Props) => {
   return (
     <>
       <button onClick={addTodo}>Click Me!</button>
-      <button
-        onClick={() => {
-          TodoEventEmitter.emit(ApplicationEvents.alert, {
-            type: AlertType.WARNING,
-            title: "This is an alert",
-            details: (
-              <div>
-                <span>Created: {new Date().toString()}</span>
-              </div>
-            ),
-          });
-        }}>
-        Generate Alert
-      </button>
-      <p>Number of Todos: {todos.length}</p>
       {dateTodoMap &&
         Object.keys(dateTodoMap).length > 0 &&
         Object.keys(dateTodoMap).map((date) => {
           const dateTodos = dateTodoMap[date] || [];
           // sort on date with latest modified first
           dateTodos.sort((t1, t2) => {
+            const { completed: t1Completed, timeModified: t1Modified } = t1;
+            const { completed: t2Completed, timeModified: t2Modified } = t2;
+            if (t1Completed && t2Completed) {
+              return moment(t2Modified).valueOf() - moment(t1Modified).valueOf();
+            }
+
+            if (t1Completed) {
+              return 1;
+            }
+
+            if (t2Completed) {
+              return -1;
+            }
+
             return new Date(t2.timeModified).getTime() - new Date(t1.timeModified).getTime();
           });
           return (
@@ -151,6 +132,30 @@ export const Todos: React.FC<Props> = (props: Props) => {
             </div>
           );
         })}
+      {addMode && (
+        <AddUpdateTodoDialog
+          current={{
+            id: uuid4(),
+            text: "",
+            type: TodoType.Work,
+            completed: false,
+            timeCreated: moment().toDate(),
+            timeModified: moment().toDate(),
+          }}
+          onUpdate={(updatedTodo) => {
+            const { text } = updatedTodo;
+            if (!text || text.trim().length === 0) {
+              emitError({ title: "Todo is missing text. Provide one and try again" });
+            } else {
+              setTodos([updatedTodo, ...todos]);
+              setAddMode(false);
+            }
+          }}
+          onCancel={() => {
+            setAddMode(false);
+          }}
+        />
+      )}
     </>
   );
 };

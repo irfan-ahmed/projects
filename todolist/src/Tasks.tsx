@@ -1,19 +1,15 @@
-import * as React from "react";
-import { Alert, AlertDetails } from "./components/alert/Alert";
-import { HelpText } from "./components/help-text/HelpText";
-import { TodoEventEmitter } from "./components/TodoEventEmitter";
-import { ApplicationEvents } from "./constants";
-import { Todos } from "./todos/Todos";
+import * as React from 'react';
+import { Alert, AlertDetails } from './components/alert/Alert';
+import { HelpText } from './components/help-text/HelpText';
+import { TodoEventEmitter } from './components/TodoEventEmitter';
+import { ApplicationEvents } from './constants';
+import { Todos } from './todos/Todos';
 
 export interface Props {}
 
 export const Tasks: React.FC<Props> = () => {
   const [alert, setAlert] = React.useState<AlertDetails>();
   const handleAlert = React.useCallback((alertDetails: AlertDetails) => {
-    console.log(
-      `DEBUG_CON-Tasks Showing alert: `,
-      JSON.stringify({ alertDetails }, (_, v) => (typeof v === "undefined" ? "undefined" : v), 1)
-    );
     setAlert(alertDetails);
     window.setTimeout(() => {
       setAlert(undefined);

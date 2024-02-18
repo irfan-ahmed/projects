@@ -1,6 +1,5 @@
-import * as React from "react";
-import { AlertType, ApplicationEvents } from "../../constants";
-import { TodoEventEmitter } from "../TodoEventEmitter";
+import * as React from 'react';
+import { AlertType } from '../../constants';
 
 export interface AlertDetails {
   type: AlertType;
@@ -12,24 +11,6 @@ export interface Props {
   alert: AlertDetails;
   onClose: () => void;
 }
-
-type EmitEventHelperType = Omit<AlertDetails, "type">;
-
-export const emitError = (data: EmitEventHelperType) => {
-  TodoEventEmitter.emit(ApplicationEvents.alert, { type: AlertType.ERROR, ...data } as AlertDetails);
-};
-
-export const emitSuccess = (data: EmitEventHelperType) => {
-  TodoEventEmitter.emit(ApplicationEvents.alert, { type: AlertType.SUCCESS, ...data } as AlertDetails);
-};
-
-export const emitInfo = (data: EmitEventHelperType) => {
-  TodoEventEmitter.emit(ApplicationEvents.alert, { type: AlertType.INFO, ...data } as AlertDetails);
-};
-
-export const emitWarning = (data: EmitEventHelperType) => {
-  TodoEventEmitter.emit(ApplicationEvents.alert, { type: AlertType.WARNING, ...data } as AlertDetails);
-};
 
 export const Alert: React.FC<Props> = (props: Props) => {
   const {
@@ -45,11 +26,6 @@ export const Alert: React.FC<Props> = (props: Props) => {
   });
 
   const { bgClasses, textClasses } = React.useMemo(() => {
-    console.log(
-      `DEBUG_CON-Alert checking color: `,
-      JSON.stringify({ type }, (_, v) => (typeof v === "undefined" ? "undefined" : v), 1)
-    );
-
     // tailwind does not work with dynamically generated classes.. hence cannot use text-${color}-500
     return colorMapping.current[type];
   }, [type]);
